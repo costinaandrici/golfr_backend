@@ -2,6 +2,7 @@ module Api
   # Controller that handles authorization and user data fetching
   class UsersController < ApplicationController
     include Devise::Controllers::Helpers
+    before_action :logged_in!, only: :show
 
     def login
       user = User.find_by('lower(email) = ?', params[:email])
@@ -26,5 +27,25 @@ module Api
         }
       }.to_json
     end
+
+    def show
+      user = User.find_by(id: params[:id])
+
+      if user
+        render json: {
+          user: {
+            name: user.name,
+            scores: user.scores
+          }
+        }
+      else
+        render json: {
+          errors: [
+            'Invalid user id: ' + params[:id]
+          ]
+        }, status: :not_found
+      end
+    end
   end
 end
+
